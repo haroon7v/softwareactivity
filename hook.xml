@@ -4,9 +4,9 @@
         <value>en_GB</value>
     </hook>
     <hook type="cdentry">
-        <identifier>cd_activitywatchwindows</identifier>
+        <identifier>cd_softwareactivity</identifier>
         <translation>25777</translation>
         <category>other</category>
-        <available>activitywatchwindows</available>
+        <available>softwareactivity</available>
     </hook>
 </hookstore>

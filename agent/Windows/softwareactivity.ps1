@@ -37,15 +37,15 @@ try {
     if ($groupedEvents -and $groupedEvents.Count -gt 0) {
         foreach ($event in $groupedEvents) {
             $appName = $event.data.app -replace "\.exe$", ""
-            $xml += "<ACTIVITYWATCHWINDOWS>"
+            $xml += "<SOFTWAREACTIVITY>"
             $xml += "<ACCESSED_AT>$($event.timestamp)</ACCESSED_AT>"
             $xml += "<APP_NAME>$appName</APP_NAME>"
-            $xml += "</ACTIVITYWATCHWINDOWS>"
+            $xml += "</SOFTWAREACTIVITY>"
         }
         Write-Host $xml
     }
     else {
-        $xml += "<ACTIVITYWATCHWINDOWS/>"
+        $xml += "<SOFTWAREACTIVITY/>"
     }
 }
 catch {

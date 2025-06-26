@@ -26,14 +26,14 @@ if (AJAX) {
 
 
 // print a title for the table
-print_item_header("Activity Watch Windows");
+print_item_header("Software Activity");
 
 if (!isset($protectedPost['SHOW'])) {
     $protectedPost['SHOW'] = 'NOSHOW';
 }
 
 // form details and tab options
-$form_name = "activitywatchwindows";
+$form_name = "softwareactivity";
 $table_name = $form_name;
 $tab_options = $protectedPost;
 $tab_options['form_name'] = $form_name;
@@ -50,7 +50,7 @@ $default_fields = $list_fields;
 
 // select columns for table display
 $sql = prepare_sql_tab($list_fields);
-$sql['SQL']  .= "FROM activitywatchwindows WHERE (hardware_id = $systemid)";
+$sql['SQL']  .= "FROM softwareactivity WHERE (hardware_id = $systemid)";
 
 array_push($sql['ARG'], $systemid);
 $tab_options['ARG_SQL'] = $sql['ARG'];

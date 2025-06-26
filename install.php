@@ -1,10 +1,10 @@
 <?php
-function extension_install_activitywatchwindows()
+function extension_install_softwareactivity()
 {
     $commonObject = new ExtensionCommon;
 
     $commonObject -> sqlQuery(
-        "CREATE TABLE activitywatchwindows (
+        "CREATE TABLE `softwareactivity` (
         ID INTEGER NOT NULL AUTO_INCREMENT, 
         HARDWARE_ID INTEGER NOT NULL,
         ACCESSED_AT DATETIME NOT NULL,
@@ -13,13 +13,13 @@ function extension_install_activitywatchwindows()
     );
 }
 
-function extension_delete_activitywatchwindows()
+function extension_delete_softwareactivity()
 {
     $commonObject = new ExtensionCommon;
-    $commonObject -> sqlQuery("DROP TABLE IF EXISTS `activitywatchwindows`");
+    $commonObject -> sqlQuery("DROP TABLE IF EXISTS `softwareactivity`");
 }
 
-function extension_upgrade_activitywatchwindows()
+function extension_upgrade_softwareactivity()
 {
 
 }
