@@ -42,8 +42,8 @@ $tab_options['table_name'] = $table_name;
 
 echo open_form($form_name);
 $list_fields = array(
-                    'Accessed At' => 'ACCESSED_AT',
-                    'App Name' => 'APP_NAME');
+                    'App Name' => 'APP_NAME',
+                    'Accessed At' => 'ACCESSED_AT');
 // columns to include at any time and default columns
 $list_col_cant_del = $list_fields;
 $default_fields = $list_fields;
