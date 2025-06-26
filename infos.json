@@ -1,0 +1,12 @@
+{
+    "displayName" : "Activity Watch Windows",
+    "author" : ["Haroon Rasheed"],
+    "contributor" : [],
+    "supportedAgent" : ["Windows", "Unix"],
+    "version" : "1.0",
+    "licence" : "GPLv2",
+    "description" : 
+        {
+            "en" : "Activity Watch Windows Bucket Client"
+        }
+}
