@@ -1,4 +1,3 @@
-
 $awServerUrl = "http://localhost:5600/api/0"
 $clientName = "aw-watcher-window"
 $timePeriod = "-24h"  # check for last 1 day
