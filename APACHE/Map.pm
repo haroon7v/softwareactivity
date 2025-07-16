@@ -13,7 +13,8 @@ $DATA_MAP{softwareactivity} = {
    cache => 0,
    fields => {
       ACCESSED_AT => {},
-      APP_NAME => {}
+      APP_NAME => {},
+      AVERAGE_USAGE => {}
    }
 };
 1;

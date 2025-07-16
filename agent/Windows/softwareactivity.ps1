@@ -1,6 +1,6 @@
 $awServerUrl = "http://localhost:5600/api/0"
 $clientName = "aw-watcher-window"
-$timePeriod = "-24h"  # check for last 1 day
+$lookbackHrs = 8
 
 try {
   # find bucketId
@@ -18,9 +18,13 @@ try {
         throw "No bucket found for client '$clientName'"
     }
 
+
     # find events
-    $startTime      = (Get-Date).AddHours(-24).ToUniversalTime().ToString("o")
-    $eventsEndpoint = "$awServerUrl/buckets/$bucketId/events?start=$startTime&limit=-1"
+    $endHour   = (Get-Date).ToUniversalTime().
+                   AddMinutes(- (Get-Date).Minute).
+                   AddSeconds(- (Get-Date).Second)
+    $startHour = $endHour.AddHours(-$lookbackHrs)
+    $eventsEndpoint = "$awServerUrl/buckets/$bucketId/events?start=$($startHour.ToString('o'))&end=$($endHour.ToString('o'))&limit=-1"
     $response       = Invoke-RestMethod -Uri $eventsEndpoint -Method Get
 
     # pre-processing events
@@ -29,23 +33,38 @@ try {
         $_
     }
 
+    # ── aggregate per app × date × hour ───────────────────────────────
+    $hourSlots = $cleanEvents | Group-Object {
+        $ts  = Get-Date $_.timestamp
+        "$( $_.data.app )|$($ts.ToString('yyyy-MM-dd'))|$($ts.Hour)"
+    } | ForEach-Object {
+        $keyParts = $_.Name -split '\|'
+        [pscustomobject]@{
+            AppName = $keyParts[0]
+            Day     = $keyParts[1]
+            Hour    = [int]$keyParts[2]
+            Seconds = ($_.Group | Measure-Object duration -Sum).Sum
+        }
+    }
+
     # latest event of unique apps
     $groupedEvents = $filteredEvents | Group-Object -Property { $_.data.app } | ForEach-Object {
         $_.Group | Sort-Object -Property timestamp -Descending | Select-Object -First 1
     }
 
-    if ($groupedEvents -and $groupedEvents.Count -gt 0) {
-        foreach ($event in $groupedEvents) {
-            $appName = $event.data.app -replace "\.exe$", ""
-            $xml += "<SOFTWAREACTIVITY>"
-            $xml += "<ACCESSED_AT>$($event.timestamp)</ACCESSED_AT>"
-            $xml += "<APP_NAME>$appName</APP_NAME>"
+    # ── emit XML ──────────────────────────────────────────────────────
+    if ($hourSlots) {
+        foreach ($slot in $hourSlots) {
+            $xml  = "<SOFTWAREACTIVITY>"
+            $xml += "<ACCESSED_AT>$($slot.Day)T$($slot.Hour.ToString('D2')):00:00Z</ACCESSED_AT>"
+            $xml += "<APP_NAME>$($slot.AppName)</APP_NAME>"
+            $xml += "<AVERAGE_USAGE>$($slot.Seconds)</AVERAGE_USAGE>"
             $xml += "</SOFTWAREACTIVITY>"
+            Write-Host $xml
         }
-        Write-Host $xml
     }
     else {
-        $xml += "<SOFTWAREACTIVITY/>"
+        Write-Host "<SOFTWAREACTIVITY/>"
     }
 }
 catch {
