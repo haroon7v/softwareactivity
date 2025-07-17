@@ -1,35 +1,40 @@
-$awServerUrl  = "http://localhost:5600/api/0"
-$clientName   = "aw-watcher-window"
-$lookbackHrs  = 24
+$awServerUrl = "http://localhost:5600/api/0"
+$clientName = "aw-watcher-window"
+$timePeriod = "-24h"  # check for last 1 day
 
 try {
-    # ---------- bucket lookup (unchanged) ----------
+  # find bucketId
     $bucketsEndpoint = "$awServerUrl/buckets/"
-    $bucketId = (Invoke-RestMethod -Uri $bucketsEndpoint -Method Get).psobject.Properties |
-                Where-Object { $_.Value.client -eq $clientName } |
-                Select-Object -First 1 -ExpandProperty Name
-    if (-not $bucketId) { throw "No bucket for '$clientName'" }
-
-    # ---------- fetch raw events for the last 24h ----------
-    $startTime      = (Get-Date).AddHours(-$lookbackHrs).ToUniversalTime().ToString("o")
-    $eventsEndpoint = "$awServerUrl/buckets/$bucketId/events?start=$startTime&limit=-1"
-    $events         = Invoke-RestMethod -Uri $eventsEndpoint -Method Get
-
-    # ---------- drop “unknown”, strip .exe ----------
-    $cleanEvents = $events |
-        Where-Object { $_.data.app -ne "unknown" } |
-        ForEach-Object {
-            $_.data.app = $_.data.app -replace '\.exe$',''
-            $_
+    $buckets         = Invoke-RestMethod -Uri $bucketsEndpoint -Method Get
+    $bucketId        = $null
+    foreach ($bucket in $buckets.PSObject.Properties) {
+        if ($bucket.Value.client -eq $clientName) {
+            $bucketId = $bucket.Name
+            break
         }
+    }
 
-    # ---------- emit ONE XML block per *raw* event (no grouping) ----------
-    if ($cleanEvents) {
-        foreach ($event in $cleanEvents) {
+    if (-not $bucketId) {
+        throw "No bucket found for client '$clientName'"
+    }
+
+    # find events
+    $startTime      = (Get-Date).AddHours(-24).ToUniversalTime().ToString("o")
+    $eventsEndpoint = "$awServerUrl/buckets/$bucketId/events?start=$startTime&limit=-1"
+    $response       = Invoke-RestMethod -Uri $eventsEndpoint -Method Get
+
+    # pre-processing events
+    $filteredEvents = $response | Where-Object { $_.data.app -ne "unknown" } | ForEach-Object {
+        $_.data.app = $_.data.app -replace "\.exe$", ""  # Remove .exe from app name
+        $_
+    }
+
+    if ($filteredEvents) {
+        foreach ($event in $filteredEvents) {
             $xml  = "<SOFTWAREACTIVITY>"
             $xml += "<ACCESSED_AT>$($event.timestamp)</ACCESSED_AT>"
             $xml += "<APP_NAME>$($event.data.app)</APP_NAME>"
-            $xml += "<AVERAGE_USAGE>$($event.duration)</AVERAGE_USAGE>"
+            $xml += "<AVERAGE_USAGE>$($event.duration)</AVERAGE_USAGE>"   # duration in seconds.decimal
             $xml += "</SOFTWAREACTIVITY>"
             Write-Host $xml
         }
