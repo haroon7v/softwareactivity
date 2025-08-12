@@ -36,11 +36,11 @@ try {
             $xml += "<APP_NAME>$($event.data.app)</APP_NAME>"
             $xml += "<AVERAGE_USAGE>$($event.duration)</AVERAGE_USAGE>"   # duration in seconds.decimal
             $xml += "</SOFTWAREACTIVITY>"
-            Write-Host $xml
         }
+        Write-Host $xml
     }
     else {
-        Write-Host "<SOFTWAREACTIVITY/>"
+        $xml += "<SOFTWAREACTIVITY/>"
     }
 }
 catch {
