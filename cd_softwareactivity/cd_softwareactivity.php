@@ -43,7 +43,8 @@ $tab_options['table_name'] = $table_name;
 echo open_form($form_name);
 $list_fields = array(
                     'App Name' => 'APP_NAME',
-                    'Accessed At' => 'ACCESSED_AT');
+                    'Accessed At' => 'ACCESSED_AT',
+                    'Average Usage' => 'AVERAGE_USAGE');
 // columns to include at any time and default columns
 $list_col_cant_del = $list_fields;
 $default_fields = $list_fields;

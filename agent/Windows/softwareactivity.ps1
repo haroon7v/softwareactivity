@@ -29,17 +29,12 @@ try {
         $_
     }
 
-    # latest event of unique apps
-    $groupedEvents = $filteredEvents | Group-Object -Property { $_.data.app } | ForEach-Object {
-        $_.Group | Sort-Object -Property timestamp -Descending | Select-Object -First 1
-    }
-
-    if ($groupedEvents -and $groupedEvents.Count -gt 0) {
-        foreach ($event in $groupedEvents) {
-            $appName = $event.data.app -replace "\.exe$", ""
-            $xml += "<SOFTWAREACTIVITY>"
+    if ($filteredEvents) {
+        foreach ($event in $filteredEvents) {
+            $xml  = "<SOFTWAREACTIVITY>"
             $xml += "<ACCESSED_AT>$($event.timestamp)</ACCESSED_AT>"
-            $xml += "<APP_NAME>$appName</APP_NAME>"
+            $xml += "<APP_NAME>$($event.data.app)</APP_NAME>"
+            $xml += "<AVERAGE_USAGE>$($event.duration)</AVERAGE_USAGE>"   # duration in seconds.decimal
             $xml += "</SOFTWAREACTIVITY>"
         }
         Write-Host $xml
